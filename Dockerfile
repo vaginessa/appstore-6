@@ -7,16 +7,17 @@
 #
 # - Python 2.7
 # - Django
-# - apache
+# - Apache2.x
 # - Java 8 and Maven
 #
 # by Keiichiro Ono (kono@ucsd.edu)
 #
+
 FROM python:2.7
 
 MAINTAINER Keiichiro Ono <kono@ucsd.edu>
 
-# For Maven, which requires Java...
+########### Install Java 8 and Maven ##################
 RUN echo 'deb http://httpredir.debian.org/debian jessie-backports main' \
 			> /etc/apt/sources.list.d/jessie-backports.list
 
@@ -43,17 +44,20 @@ RUN curl -fsSL http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binar
 
 ENV MAVEN_HOME /usr/share/maven
 
-# Install system-level dependencies:
-RUN apt-get update && apt-get install -y \
+
+########### Install dependencies used by Django App ##################
+RUN apt-get install -y \
 		build-essential \
 		python-imaging \
 		geoip-bin geoip-dbg libgeoip-dev \
 		unzip curl zlib1g-dev g++ uuid-dev \
 		apache2 apache2-mpm-prefork apache2-prefork-dev \
-		libapache2-mod-wsgi && \
+		libapache2-mod-wsgi vim && \
 		mkdir /xapian
-WORKDIR /xapian
 
+# Download and compile Python bindings for xapian.
+# Ubuntu package version does not work!
+WORKDIR /xapian
 RUN apt-get install -y python-xapian libxapian-dev
 RUN curl -O http://oligarchy.co.uk/xapian/1.2.19/xapian-bindings-1.2.19.tar.xz && \
 	tar xf /xapian/xapian-bindings-1.2.19.tar.xz
@@ -61,22 +65,47 @@ RUN curl -O http://oligarchy.co.uk/xapian/1.2.19/xapian-bindings-1.2.19.tar.xz &
 WORKDIR /xapian/xapian-bindings-1.2.19
 RUN ./configure --with-python && make && make install
 
-# Install required Python packages
-RUN pip install mod_wsgi Django==1.4.5 MySQL-Python django-social-auth Pillow
 
-# Add this code base to the container
-RUN mkdir /appstore
-WORKDIR /appstore
-ADD . /appstore/
+############# Install required Python packages through PyPI #############
+
+# Use Pillow instead of olf PIL
+RUN pip install mod_wsgi Django==1.4.5 MySQL-Python django-social-auth Pillow GeoIP
+
+
+# Copy local code base to the container
+# Note that CyAppStore is the top-level directory for the entire application
+RUN mkdir /var/www/CyAppStore && \
+	mkdir /var/www/CyAppStore/logs && \
+	mkdir /var/www/CyAppStore/media
+WORKDIR /var/www/CyAppStore
+ADD . /var/www/CyAppStore
 
 # This credentials directory should be copied from your secret directory!
-ADD ./credentials/* /appstore/conf/
+ADD ./credentials/*.py /var/www/CyAppStore/conf/
 
-# Build geoip
-WORKDIR /appstore/download/geolite
+# Download geoip files from remote server.
+WORKDIR /var/www/CyAppStore/download/geolite
 RUN make
 
-# Verify the dependencies
-WORKDIR /appstore
+# Verify the dependencies.  This does not work without 
+WORKDIR /var/www/CyAppStore
 RUN python external_scripts/test_dependencies.py
+
+# TODO: Make this checker work
 #RUN python manage.py test_geoip
+
+################ Apache2 setup ################
+
+# Copy setting file
+ADD ./credentials/appstore.conf /etc/apache2/sites-available/
+
+# Disable default site
+RUN a2dissite 000-default
+
+# Enable App Store Django web app
+RUN a2ensite appstore
+
+EXPOSE 80
+
+# Run the Apache server in the script.
+CMD ["./run.sh"]

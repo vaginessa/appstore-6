@@ -1,18 +1,16 @@
 # Docker Compose file for Cytoscape App Store
 
-
-db:
-  image: mysql
-
 appstore:
   build: .
-  expose:
-    - "8000"
+  ports:
+    - "80:80"
   links:
-    - db
-  volumes:
-    - /usr/src/app/static
-  env_file: .env
-  command: /usr/local/bin/gunicorn docker_django.wsgi:application -w 2 -b :8000
-  volumes:
-    - .:/code
+    - mysql
+
+mysql:
+  image: mysql:latest
+  environment:
+    MYSQL_ROOT_PASSWORD: 
+    MYSQL_DATABASE: 
+    MYSQL_USER: 
+    MYSQL_PASSWORD: 
