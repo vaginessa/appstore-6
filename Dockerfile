@@ -1,4 +1,14 @@
 # Docker file for Cytoscape App Store
+# 
+# This version is a straight port from the original version.
+# i.e., very monorithic...
+#
+# The container has the following dependencies
+#
+# - Python 2.7
+# - Django
+# - apache
+# - Java 8 and Maven
 #
 # by Keiichiro Ono (kono@ucsd.edu)
 #
@@ -38,29 +48,29 @@ RUN apt-get update && apt-get install -y \
 		build-essential \
 		python-imaging \
 		geoip-bin geoip-dbg libgeoip-dev \
-		unzip
-
-# Install xapian and python-binding manually...
-RUN apt-get install -y curl zlib1g-dev g++ uuid-dev
-RUN mkdir /xapian
+		unzip curl zlib1g-dev g++ uuid-dev \
+		apache2 apache2-mpm-prefork apache2-prefork-dev \
+		libapache2-mod-wsgi && \
+		mkdir /xapian
 WORKDIR /xapian
 
 RUN apt-get install -y python-xapian libxapian-dev
-
-RUN curl -O http://oligarchy.co.uk/xapian/1.2.19/xapian-bindings-1.2.19.tar.xz
-RUN tar xf /xapian/xapian-bindings-1.2.19.tar.xz
+RUN curl -O http://oligarchy.co.uk/xapian/1.2.19/xapian-bindings-1.2.19.tar.xz && \
+	tar xf /xapian/xapian-bindings-1.2.19.tar.xz
 
 WORKDIR /xapian/xapian-bindings-1.2.19
 RUN ./configure --with-python && make && make install
 
 # Install required Python packages
-RUN pip install Django MySQL-Python django-social-auth Pillow
-
+RUN pip install mod_wsgi Django==1.4.5 MySQL-Python django-social-auth Pillow
 
 # Add this code base to the container
 RUN mkdir /appstore
 WORKDIR /appstore
 ADD . /appstore/
+
+# This credentials directory should be copied from your secret directory!
+ADD ./credentials/* /appstore/conf/
 
 # Build geoip
 WORKDIR /appstore/download/geolite
@@ -69,4 +79,4 @@ RUN make
 # Verify the dependencies
 WORKDIR /appstore
 RUN python external_scripts/test_dependencies.py
-RUN python manage.py test_geoip
+#RUN python manage.py test_geoip
