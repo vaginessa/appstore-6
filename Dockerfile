@@ -1,4 +1,5 @@
-# Docker file for Cytoscape App Store
+#
+# Docker file for Cytoscape App Store Djang apps
 # 
 # This version is a straight port from the original version.
 # i.e., very monorithic...
@@ -8,6 +9,7 @@
 # - Python 2.7
 # - Django
 # - Apache2.x
+# - GeoIP
 # - Java 8 and Maven
 #
 # by Keiichiro Ono (kono@ucsd.edu)
@@ -46,12 +48,13 @@ ENV MAVEN_HOME /usr/share/maven
 
 
 ########### Install dependencies used by Django App ##################
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
 		build-essential \
 		python-imaging \
-		geoip-bin geoip-dbg libgeoip-dev \
-		unzip curl zlib1g-dev g++ uuid-dev \
+		mysql-client \
 		apache2 apache2-mpm-prefork apache2-prefork-dev \
+		geoip-bin geoip-dbg libgeoip-dev libapache2-mod-geoip python-geoip \
+		unzip curl zlib1g-dev g++ uuid-dev \
 		libapache2-mod-wsgi vim && \
 		mkdir /xapian
 
@@ -91,7 +94,7 @@ RUN make
 WORKDIR /var/www/CyAppStore
 RUN python external_scripts/test_dependencies.py
 
-# TODO: Make this checker work
+# Check GeoIP binary
 #RUN python manage.py test_geoip
 
 ################ Apache2 setup ################
