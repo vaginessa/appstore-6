@@ -11,8 +11,12 @@ aws_secret=$(grep $SECRET ~/.aws/credentials | cut -d "=" -f 2 | tr -d '[[:space
 # Defaults
 AWS_VPC="vpc-194d467b"
 AWS_SECURITY_GROUP="ci-http"
-AWS_PRICE="0.03"
-AWS_INSTANCE_TYPE="m4.xlarge"
+AWS_PRICE="0.01"
+AWS_INSTANCE_TYPE="m3.medium"
+
+
+aws_instance_type=$AWS_INSTANCE_TYPE
+aws_price=$AWS_PRICE
 
 help() {
     echo "Usage: $0 [-i instance-type] [-p spot-instance-price] name driver" 1>&2

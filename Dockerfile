@@ -108,6 +108,11 @@ RUN a2dissite 000-default
 # Enable App Store Django web app
 RUN a2ensite appstore
 
+# Change permissin of media directory
+RUN groupadd mediausers && adduser www-data mediausers && \
+	chgrp -R mediausers /var/www/CyAppStore/media && \
+	chmod -R 770 /var/www/CyAppStore/media
+
 EXPOSE 80
 
 # Run the Apache server in the script.
