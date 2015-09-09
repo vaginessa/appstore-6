@@ -1,0 +1,31 @@
+# 
+# Application setting for Cytoscape App Store
+# 
+# by Keiichiro Ono (kono at ucsd edu.)
+#
+
+appstore:
+  build: .
+  ports:
+    - "80:80"
+  links:
+    - mysql
+  volumes_from:
+    - data
+
+mysql:
+  image: mysql:5.6
+  environment: # Set all of these values from original setting file.
+    MYSQL_ROOT_PASSWORD: 
+    MYSQL_DATABASE: 
+    MYSQL_USER: 
+    MYSQL_PASSWORD: 
+  volumes_from:
+    - data
+
+# Data volume container - This is the container we need to backup!
+data:
+  build: ./data-only
+  volumes:
+    - /var/lib/mysql
+    - /var/www/CyAppStore/media
