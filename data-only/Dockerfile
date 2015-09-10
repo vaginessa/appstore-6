@@ -11,8 +11,8 @@ RUN mkdir /tmp_data
 WORKDIR /tmp_data
 
 # Currently, this only works from EC2 instance
-RUN wget https://s3-us-west-2.amazonaws.com/cytoscape/appstore/current/cyappstore-media-150908.tgz && \
-	wget https://s3-us-west-2.amazonaws.com/cytoscape/appstore/current/dump.sql
+RUN wget http://chianti.ucsd.edu/~kono/data/appstore/cyappstore-media-150908.tgz
+RUN wget http://chianti.ucsd.edu/~kono/data/appstore/dump.sql
 
 # Move it 
 RUN mv dump.sql /var/lib/mysql/
