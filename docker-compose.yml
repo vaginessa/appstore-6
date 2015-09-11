@@ -15,7 +15,7 @@ appstore:
 
 mysql:
   image: mysql:5.6
-  environment: # Set all of these values from original setting file.
+  environment:
     MYSQL_ROOT_PASSWORD: 
     MYSQL_DATABASE: 
     MYSQL_USER: 

@@ -78,8 +78,8 @@ RUN pip install mod_wsgi Django==1.4.5 MySQL-Python django-social-auth Pillow Ge
 # Copy local code base to the container
 # Note that CyAppStore is the top-level directory for the entire application
 RUN mkdir /var/www/CyAppStore && \
-	mkdir /var/www/CyAppStore/logs && \
-	mkdir /var/www/CyAppStore/media
+	mkdir /var/www/CyAppStore/logs
+
 WORKDIR /var/www/CyAppStore
 ADD . /var/www/CyAppStore
 
@@ -108,10 +108,6 @@ RUN a2dissite 000-default
 # Enable App Store Django web app
 RUN a2ensite appstore
 
-# Change permissin of media directory
-RUN groupadd mediausers && adduser www-data mediausers && \
-	chgrp -R mediausers /var/www/CyAppStore/media && \
-	chmod -R 770 /var/www/CyAppStore/media
 
 EXPOSE 80
 

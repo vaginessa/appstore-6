@@ -61,7 +61,7 @@ elif [ "$2" == "aws" ]; then
         --amazonec2-vpc-id $AWS_VPC \
         --amazonec2-region us-west-2 \
         --amazonec2-zone b \
-        --amazonec2-root-size 20 \
+        --amazonec2-root-size 40 \
         --amazonec2-security-group $AWS_SECURITY_GROUP \
         --amazonec2-spot-price $aws_price --amazonec2-instance-type $aws_instance_type $1
         #--amazonec2-ami: The AMI ID of the instance to use Default: ami-4ae27e22
